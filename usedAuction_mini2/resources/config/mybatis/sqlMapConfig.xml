@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 설정파일에서 사용할 프로퍼티의 파일의 경로 지정: classpath -->
+	<properties resource="config/mybatis/db.properties"/>
+	
+	<!-- SQL의 결과를 담을 VO 객체들의 별칭을 설정하여 사용의 편의를 도모  -->
+	<typeAliases>
+		<typeAlias alias="CorpVO" type="kr.bit.auction.member.vo.MemberCorpVO" />
+		<typeAlias alias="GenericVO" type="kr.bit.auction.member.vo.MemberGenericVO" />
+		<typeAlias alias="MngVO" type="kr.bit.auction.member.vo.MemberMngVO" />
+		<typeAlias alias="PrvVO" type="kr.bit.auction.member.vo.MemberPrvVO" />
+		<typeAlias alias="BoardVO" type="kr.bit.auction.member.vo.BoardVO" />
+		<typeAlias alias="ProductVO" type="kr.bit.auction.vo.ProductCategoryVO" />
+		<typeAlias alias="PageVO" type="kr.bit.auction.vo.PageVO" />
+		<typeAlias alias="AuctionVO" type="kr.bit.auction.vo.AuctionVO" />
+		<typeAlias alias="FileAuctionVO" type="kr.bit.auction.vo.FileAuctionVO" />
+		<typeAlias alias="MyBidVO" type="kr.bit.auction.vo.MyBidVO" />
+		<typeAlias alias="MyAuctionVO" type="kr.bit.auction.vo.MyAuctionVO" />
+		<typeAlias alias="SelectMenuVO" type="kr.bit.auction.vo.SelectMenuVO" />
+		<typeAlias alias="CommentsVO" type="kr.bit.auction.vo.CommentsVO" />
+		<typeAlias alias="BidVO" type="kr.bit.auction.vo.BidVO" />
+	</typeAliases>
+	
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC"/>
+			<dataSource type="POOLED">
+				<property name="driver" value="${driver}"/>
+				<property name="url" value="${url}"/>
+				<property name="username" value="${username}"/>
+				<property name="password" value="${password}"/>
+			</dataSource>
+		</environment>
+	</environments>
+
+	<mappers>
+		<mapper resource="config/sqlmap/oracle/member.xml"/>
+		<mapper resource="config/sqlmap/oracle/board.xml"/>
+		<mapper resource="config/sqlmap/oracle/auction.xml"/>
+	</mappers>
+</configuration>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

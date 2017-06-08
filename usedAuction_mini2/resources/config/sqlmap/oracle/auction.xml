@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.bit.auction.mapper.AuctionMapper">
+	<resultMap type="ProductVO" id="categoryMap">
+		<result property="pdtTypeNo" column="pdt_type_no"/>
+		<result property="pdtTypeNm" column="pdt_type_nm"/>
+		<collection property="products" column="pdt_type_no" javaType="java.util.ArrayList" ofType="ProductCategoryVO" select="selectLowProductCategory"/>
+	</resultMap>
+	
+	<select id="selectProductCategory" resultMap="categoryMap">
+		select pdt_type_no, pdt_type_nm
+			from product_category
+			where pdt_high_type_no is null
+	</select>
+	<select id="selectLowProductCategory" resultType="ProductVO">
+		select pdt_type_no as pdtTypeNo, pdt_type_nm as pdtTypeNm
+			from product_category
+			where pdt_high_type_no = #{pdt_type_no}
+	</select>
+	
+	<resultMap type="AuctionVO" id="auctionMap">
+		<result property="acNo" column="ac_no"/>
+		<result property="acStartDate" column="ac_start_date"/>
+		<result property="acEndDate" column="ac_end_date"/>
+		<result property="acNm" column="ac_nm"/>
+		<result property="acContent" column="ac_content"/>
+		<result property="acCnt" column="ac_cnt"/>
+		<result property="acStartPrice" column="ac_start_price"/>
+		<result property="currentPrice" column="bid_price"/>
+		<result property="mbNo" column="mb_no"/>
+		<result property="pdtTypeNo" column="pdt_type_no"/>
+		<result property="acResult" column="ac_result"/>
+		<result property="mbId" column="mb_id"/>
+		<collection property="files" column="ac_no" javaType="java.util.ArrayList" ofType="FileAuctionVO" select="selectFileAuction"/>
+	</resultMap>
+	<select id="selectTop3Auction" resultMap="auctionMap">
+		select a.ac_no, c.bid_date as ac_start_date, a.ac_end_date, a.ac_nm, ac_content, a.ac_cnt,  c.bid_price, a.mb_no, a.pdt_type_no, a.ac_result, d.mb_id
+		from 
+			auction a
+		inner join 
+			product_category b
+			on a.pdt_type_no = b.pdt_type_no
+		inner join 
+			(select * from bid order by bid_price desc) c
+        on a.ac_no = c.ac_no
+        inner join 
+        	member_generic d
+        on a.mb_no = d.mb_no
+        where
+        <![CDATA[
+        	rownum < 4
+        	]]>
+           	and a.ac_result = '1401'
+           	and c.sbid_result = '1602'
+           	and c.bid_date between last_day(add_months(sysdate,-1)) and last_day(sysdate)
+        order by c.bid_price desc 
+	</select>
+	<select id="selectTopAuction" parameterType="SelectMenuVO" resultMap="auctionMap">
+		select a.ac_no, c.bid_date as ac_start_date, a.ac_end_date, a.ac_nm, ac_content, a.ac_cnt,  c.bid_price, a.mb_no, a.pdt_type_no, a.ac_result, d.mb_id
+		from 
+			auction a
+		inner join 
+			product_category b
+			on a.pdt_type_no = b.pdt_type_no
+		inner join 
+			bid c
+        on a.ac_no = c.ac_no
+        inner join 
+        	member_generic d
+        on a.mb_no = d.mb_no
+        <where>
+           <choose>
+           		<when test="selectType=='low'">
+           		a.ac_no = #{acNo}
+           		</when>
+            	<otherwise>
+	           	b.pdt_high_type_no = #{pdtTypeNo}
+              	and a.ac_result = '1401'
+              	and c.sbid_result = '1602'
+              	and c.bid_date between last_day(add_months(sysdate,-1)) and last_day(sysdate)
+              	order by a.ac_no desc 
+             	</otherwise>
+          </choose>
+       </where>
+	</select>
+	<select id="selectAfootAuction" parameterType="SelectMenuVO" resultMap="auctionMap">
+		select * from (
+		select a.ac_no, a.ac_start_date, a.ac_end_date, a.ac_nm, ac_content, a.ac_cnt, a.ac_start_price, c.bid_price, a.mb_no, a.pdt_type_no, a.ac_result, d.mb_id
+			from 
+			 	auction a
+			inner join 
+				product_category b
+			on a.pdt_type_no = b.pdt_type_no
+			left outer join ( 
+                    select ac_no, max(bid_price) as bid_price from bid group by ac_no) c
+            on a.ac_no = c.ac_no
+            inner join 
+            	member_generic d
+            on a.mb_no = d.mb_no
+            <where>
+             	<choose>
+             		<when test="selectType=='low'">
+             			a.ac_no = #{acNo}
+             		</when>
+	             	<otherwise>
+					  b.pdt_high_type_no = #{pdtTypeNo}
+					  and a.ac_result = '1403'
+					  
+					  order by a.ac_no desc 
+	             	</otherwise>
+             	</choose>
+            </where>
+		)
+		<if test="selectType=='main'">
+	     <![CDATA[
+	     where rownum < 5
+	     ]]>
+	    </if> 
+	</select>
+	<select id="selectFileAuction" parameterType="int" resultType="FileAuctionVO">
+		select
+			ac_file_no as acFileNo,
+			ac_file_nm as acFileNm,
+			ac_file_path as acFilePath,
+			ac_file_Rl_nm as acFileRlNm,
+			ac_file_size as acFileSize,
+			ac_no as acNo,
+			ac_file_type as acFileType
+		from file_auction
+		where ac_no = #{ac_no}
+		order by ac_file_no
+	</select>
+	<insert id="insertAuction" parameterType="AuctionVO">
+	<selectKey keyProperty="acNo" resultType="int" order="BEFORE">
+		select s_auction_no.nextval from dual
+	</selectKey>
+		insert into
+			auction(
+				ac_no, ac_start_date, ac_end_date, ac_nm, ac_content, ac_cnt, ac_start_price, mb_no, pdt_type_no, ac_result
+			) values (
+				#{acNo}, #{acStartDate}, #{acEndDate}, #{acNm}, #{acContent}, #{acCnt}, #{acStartPrice}, #{mbNo}, #{pdtTypeNo}, #{acResult}
+			)
+	</insert>
+	
+	<insert id="insertFileAuction" parameterType="FileAuctionVO">
+		insert into 
+			file_auction(
+				ac_file_no, ac_file_nm, ac_file_path, ac_file_rl_nm, ac_file_size, ac_no, ac_file_type
+			) values (
+				s_file_auction_no.nextval, #{acFileNm}, #{acFilePath}, #{acFileRlNm}, #{acFileSize}, #{acNo}, #{acFileType}			
+			)
+	</insert>
+	
+	<select id="selectMyBid" parameterType="int" resultType="MyBidVO" >
+		select 
+			b.bid_no as bidNo, 
+			a.ac_nm as acNm, 
+			a.ac_end_date as acEndDate,
+			e.classf_nm as sbidResult,
+			b.bid_cnt as bidCnt, 
+			b.bid_price as bidPrice, 
+			c.bid_price as currentPrice 
+		from 
+			auction a
+		inner join bid b
+			on a.ac_no = b.ac_no
+		inner join (select bid_price, ac_no
+		     from bid
+		        order by bid_price desc
+		      )  c 
+			on a.ac_no = c.ac_no
+			and rownum = 1
+		inner join member_generic d
+			on b.mb_no = d.mb_no
+		inner join cls_code e
+			on b.sbid_result = e.classf_code
+			where d.mb_no = #{mbNo}
+			order by b.bid_no desc
+	</select>
+	<select id="selectMyAuction" parameterType="int" resultType="MyAuctionVO">
+		select a.ac_nm as acNm,
+			a.ac_start_price as acStartPrice, 
+			c.bid_price as currentPrice, 
+			e.mb_id as mbId, 
+			d.classf_nm as sbidResult, 
+			a.ac_end_date as acEndDate, 
+			c.bid_cnt as bidCnt
+		from 
+			auction a
+		inner join member_generic b
+			on a.mb_no = b.mb_no
+		inner join (select bid_price, ac_no, sbid_result, mb_no, bid_cnt
+			    	from bid
+			        order by bid_price desc
+			      )  c 
+			on a.ac_no = c.ac_no
+			and rownum = 1
+		inner join cls_code d
+			on c.sbid_result = d.classf_code
+		inner join member_generic e
+			on c.mb_no = e.mb_no
+			where a.mb_no=#{mbNo}	
+	
+	</select>
+	<select id="selectComments" parameterType="int" resultType="CommentsVO">
+	select 
+        a.comments_no as commentsNo,
+        a.comments_content as commentsContent,
+        a.comment_mk_date as commentMkDate,
+        a.ac_no as acNo,
+        c.mb_id as mbId
+    from 
+    	comments a
+    inner join 
+    	auction b
+    	on a.ac_no = b.ac_no
+    inner join 
+    	member_generic c
+    	on a.mb_no = c.mb_no
+    where 
+    	a.ac_no = #{acNo}
+    order by 
+    	comments_no desc
+	</select>
+	<insert id="insertComment" parameterType="CommentsVO">
+		insert into
+			comments(
+			comments_no, comments_content, comment_mk_date, ac_no, mb_no
+			) values (
+			s_comment_no.nextval, #{commentsContent}, sysdate, #{acNo}, #{mbNo}
+			)
+		
+	</insert>
+	
+	<select id="selectBidHistory" parameterType="int" resultType="BidVO">
+		select c.mb_id as mbId, b.bid_date as bidDate, b.bid_price as bidPrice, d.classf_nm as sbidResult
+			from auction a
+			inner join bid b
+			on a.ac_no = b.ac_no
+			inner join member_generic c
+			on c.mb_no = b.mb_no
+			inner join cls_code d
+			on b.sbid_result = d.classf_code
+			where a.ac_no = #{acNo}
+			and b.sbid_result != '1603' 
+			order by bid_date desc
+		
+	</select>
+	
+	<select id="selectCurrentPrice" parameterType="int" resultType="int">
+		select 
+	        nvl(b.bid_price, a.ac_start_price) as currentPrice
+	    from 
+	        auction a
+	    left outer join( select 
+	                        ac_no, max(bid_price) as bid_price 
+	                     from 
+	                        bid
+	                     group by ac_no ) b  
+	     on a.ac_no = b.ac_no
+	     where a.ac_no = #{acNo}
+	</select>
+	<insert id="insertBid" parameterType="BidVO">
+		insert into
+			bid(
+			bid_no, bid_price, bid_date, bid_cnt, ac_no, mb_no, sbid_result
+			) values (
+			s_bid_no.nextval, #{bidPrice}, #{bidDate}, 1, #{acNo}, #{mbNo}, #{sbidResult}
+			)
+	</insert>
+	
+	<update id="updateBatBid">
+		update 
+			bid a 
+		set sbid_result='1602' 
+        where (ac_no, bid_price) in 
+              (select ac_no, max(bid_price) as bid_price from bid  where sbid_result != '1603' group by ac_no)
+               <![CDATA[
+               and (select b.ac_end_date from auction b where a.ac_no= b.ac_no) < sysdate
+               and (select b.ac_end_date from auction b where a.ac_no= b.ac_no) > sysdate-1
+               ]]>
+	</update>
+	<update id="updateBatAuction">
+		update auction a 
+		set ac_result='1401'
+        where ac_no in ( select ac_no from bid where sbid_result = '1602')
+              <![CDATA[
+              and a.ac_end_date > sysdate - 1
+              ]]>
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

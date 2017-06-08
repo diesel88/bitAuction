@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.bit.auction.mapper.BoardMapper">
+	<resultMap type="BoardVO" id="boardList">
+		<id column="RN" property="RN" />
+		<result column="ART_NO" property="ART_NO" />
+		<result column="TITLE" property="TITLE" />
+		<result column="CONTENT" property="CONTENT" />
+		<result column="ART_HIGH_NO" property="ART_HIGH_NO" />
+		<result column="MB_NO" property="MB_NO" />
+		<result column="ART_MK_DATE" property="ART_MK_DATE" />
+		<result column="ART_DO_STATUS" property="ART_DO_STATUS" />
+		<result column="RQST_TYPE" property="RQST_TYPE" />
+		<result column="MB_ID" property="MB_ID" />
+	</resultMap>
+	
+	<select id="listReplys" parameterType="int" resultType="BoardVO">
+		SELECT 
+			ROWNUM RN,
+		    B.ART_NO,
+		    B.TITLE,
+		    B.CONTENT,
+		    B.ART_HIGH_NO,
+		    B.MB_NO,
+		    B.ART_MK_DATE,
+		    B.ART_DO_STATUS,
+		    B.RQST_TYPE, 
+		    U.MB_ID
+		FROM 
+		    QNABOARD B INNER JOIN MEMBER_GENERIC U
+    		ON B.MB_NO = U.MB_NO
+		WHERE
+			B.ART_HIGH_NO = #{ART_NO}
+	</select>
+	
+	<select id="listTot" resultType="int" >
+			SELECT
+			    COUNT(*) AS TOT
+			FROM 
+			    QNABOARD
+			WHERE 
+			    NVL(ART_HIGH_NO, '0') = 0; 
+	</select>
+	
+	<select id="list" resultMap="boardList" parameterType="PageVO">
+		SELECT RN, ART_NO, TITLE, CONTENT, ART_HIGH_NO, MB_NO,
+			    ART_MK_DATE, ART_DO_STATUS, RQST_TYPE, MB_ID
+		FROM (
+			SELECT
+			    ROWNUM RN,
+			    B.ART_NO,
+			    B.TITLE,
+			    B.CONTENT,
+			    B.ART_HIGH_NO,
+			    B.MB_NO,
+			    B.ART_MK_DATE,
+			    B.ART_DO_STATUS,
+			    B.RQST_TYPE, 
+			    U.MB_ID
+			FROM 
+			    QNABOARD B INNER JOIN MEMBER_GENERIC U
+	    		ON B.MB_NO = U.MB_NO
+			WHERE
+				B.ART_NO = #{ART_NO}
+			) BOARD 
+		WHERE 
+			RN >= #{START} AND 
+			#{END} >= RN
+	</select>
+	
+	<select id="detail" parameterType="int" resultType="BoardVO">
+		SELECT 
+		    B.ART_NO,
+		    B.TITLE,
+		    B.CONTENT,
+		    B.ART_HIGH_NO,
+		    B.MB_NO,
+		    B.ART_MK_DATE,
+		    B.ART_DO_STATUS,
+		    B.RQST_TYPE, 
+		    U.MB_ID
+		FROM 
+		    QNABOARD B INNER JOIN MEMBER_GENERIC U
+    		ON B.MB_NO = U.MB_NO		
+		where 
+			B.ART_NO = #{ART_NO}
+	 </select>
+	 
+	 <insert id="insert" parameterType="BoardVO">
+ 		INSERT INTO QNABOARD
+		( ART_NO, TITLE, CONTENT, MB_NO , ART_MK_DATE,
+		  ART_DO_STATUS, RQST_TYPE
+		  <if test="ART_HIGH_NO != null">
+		  	,ART_HIGH_NO
+		  </if>
+		  ) VALUES 
+		(BOARD_SEQ.NEXTVAL, #{TITLE}, #{CONTENT}, #{MB_NO}, sysdate,
+			#{ART_DO_STATUS}, #{RQST_TYPE}
+		   <if test="ART_HIGH_NO != null">
+		  		,#{ART_HIGH_NO}
+		  </if>
+		)
+	 </insert>
+	 
+	 <update id="update" parameterType="BoardVO">
+	 		UPDATE QNABOARD
+			SET TITLE = #{TITLE},
+			    CONT = #{CONTENT}
+		   <if test="RQST_TYPE != null">
+		  		,#{RQST_TYPE}
+		  </if>
+			WHERE 
+				ART_NO = #{ART_NO}
+	 </update>
+	 
+	 <update id="updateQuesCD" >
+	 		UPDATE QNABOARD
+			SET 
+				ART_DO_STATUS = #{ART_DO_STATUS}			    
+			WHERE 
+				ART_NO = #{ART_NO}
+	 </update>
+	 
+	 <delete id="delete" parameterType="int">
+	  		DELETE
+			FROM QNABOARD
+			WHERE 
+				ART_NO = #{ART_NO}
+	 </delete>
+</mapper>

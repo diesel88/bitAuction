@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.bit.auction.mapper.MemberMapper">
+	<insert id="insertMember" parameterType="GenericVO">
+		insert into MEMBER_GENERIC(
+			MB_NO, MB_DROP_STATUS, MB_TYPE, MB_ID, MB_PW, MB_NM, MB_EMAIL, MB_SEX, ZIP, ADDR, DTL_ADDR
+		) values (
+			MEMBER_GENERIC_mbNo.nextval, #{mbDropStatus}, #{mbType}, #{mbId}, #{mbPw}, #{mbNm}, #{mbEmail}, #{mbSex}, #{zip}, #{addr}, #{dtlAddr}
+		)
+	</insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
