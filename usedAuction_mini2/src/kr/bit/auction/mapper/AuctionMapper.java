@@ -49,4 +49,6 @@ public interface AuctionMapper {
 	
 	public int updateBatAuction();
 	
+	public int cancelAuction(int acNo);
+	
 }

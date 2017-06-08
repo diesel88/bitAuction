@@ -42,7 +42,7 @@ public class TopAuctionServlet extends HttpServlet{
 		List<AuctionVO> auctions =	mapper.selectTopAuction(select);
 		
 		request.setAttribute("auctions", auctions);
-		request.setAttribute("auctionsLength", new Integer(auctions.size()-1));
+		request.setAttribute("auctionsLength", new Integer(auctions.size()));
 		
 		RequestDispatcher rd = request.getRequestDispatcher("/jsp/auction/top.jsp");
 		rd.forward(request, response);

@@ -8,9 +8,17 @@ public class MyAuctionVO {
 	private long acStartPrice;
 	private long currentPrice;
 	private String mbId;
+	private String acResult;
 	private String sbidResult;
 	private Date acEndDate;
 	private int bidCnt;
+	
+	public String getAcResult() {
+		return acResult;
+	}
+	public void setAcResult(String acResult) {
+		this.acResult = acResult;
+	}
 	public int getAcNo() {
 		return acNo;
 	}

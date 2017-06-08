@@ -42,7 +42,7 @@ public class AfootAuctionServlet extends HttpServlet{
 		List<AuctionVO> auctions =	mapper.selectAfootAuction(select);
 		
 		request.setAttribute("auctions", auctions);
-		request.setAttribute("auctionsLength", new Integer(auctions.size()-1));
+		request.setAttribute("auctionsLength", new Integer(auctions.size()));
 		
 		RequestDispatcher rd = request.getRequestDispatcher("/jsp/auction/afoot.jsp");
 		rd.forward(request, response);

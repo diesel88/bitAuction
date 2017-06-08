@@ -38,17 +38,20 @@ public class MainServlet extends HttpServlet{
 							  ProductCode.ETC_CD.getValue()};
 		SelectMenuVO[] selects = new SelectMenuVO[4];
 		List<List<AuctionVO>> auctions = new ArrayList<>();
+		List<Integer> auctionsLength = new ArrayList<>();
 		for(int i=0; i < selects.length; i++) {
 			selects[i] = new SelectMenuVO();
 			selects[i].setSelectType("main");
 			selects[i].setPdtTypeNo(codes[i]);
 			List<AuctionVO> list = mapper.selectAfootAuction(selects[i]);
 			auctions.add(list);
+			auctionsLength.add(list.size());
 		}
 		
 		request.setAttribute("top3", top3);
 		request.setAttribute("auctions", auctions);
 		request.setAttribute("categorys", categorys);
+		request.setAttribute("auctionsLength", auctionsLength);
 		
 		RequestDispatcher rd = request.getRequestDispatcher("/jsp/main/main.jsp");
 		rd.forward(request, response);

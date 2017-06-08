@@ -56,7 +56,14 @@
 			<td><c:out value="${auction.currentPrice }"/></td>
 			<td><c:out value="${auction.mbId }"/></td>
 			<td><c:out value="${auction.bidCnt }"/></td>
-			<td><div><c:out value="${auction.sbidResult }"/></div><div><a href="cancelAuction.do?acNo=${auction.acNo}" onclick='doCancelAuction(${auction.acNo});'>판매취소</a><a href="updateAuctionForm.do?acNo=${auction.acNo }">물품수정</a></div></td>
+			<td><div><c:out value="${auction.sbidResult }"/></div>
+				<div>
+					<c:if test="${auction.acResult=='1403' }">
+					<a href="cancelAuction.do?acNo=${auction.acNo}" onclick='doCancelAuction(${auction.acNo});'>판매취소</a>
+					 <a href="updateAuctionForm.do?acNo=${auction.acNo }">물품수정</a>
+					</c:if>
+				</div>
+			</td>
 			<td><fmt:formatDate value="${auction.acEndDate }" pattern="yyyy/MM/dd HH:mm"/></td>
 		</tr>
 		</c:forEach>

@@ -53,6 +53,15 @@
 <div class="row">
 	<div class="col-md-10">
 		<center><h3><c:out value="${categorys[i] }"/></h3></center>
+		<c:choose>
+		<c:when test="${auctionsLength[i] == 0 }">
+		<div class="row">
+			<div class="col-md-10">
+			<c:out value = "내역이 없습니다."/>
+			</div>
+		</div>
+		</c:when>
+		<c:otherwise>
 		<c:forEach var="j" begin="0" end="3" step="1">
 		<div class="col-md-3">
 			<div class="thumbnail">
@@ -68,7 +77,8 @@
 			</div>
 		</div>
 		</c:forEach>
-		
+		</c:otherwise>
+		</c:choose>
 		
 	</div>
 </div>

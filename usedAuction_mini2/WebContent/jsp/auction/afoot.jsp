@@ -4,7 +4,16 @@
 
 <c:import url="/jsp/common/header.jsp" />
 <c:import url="/jsp/common/nav.jsp" />
-<c:forEach begin="0" end="${auctionsLength }" var="i" step="4">
+<c:choose>
+<c:when test="${auctionsLength == 0 }">
+<div class="row">
+	<div class="col-md-10">
+	<c:out value = "내역이 없습니다."/>
+	</div>
+</div>
+</c:when>
+<c:otherwise>
+<c:forEach begin="0" end="${auctionsLength -1 }" var="i" step="4">
 <div class="row">
 	<div class="col-md-10">
 		<div class="col-md-3">
@@ -77,6 +86,8 @@
 	</div>
 </div>
 </c:forEach>
+</c:otherwise>
+</c:choose>
 
 
 <c:import url="/jsp/common/footer.jsp" />
